@@ -63,6 +63,10 @@ func New(dev io.ReadWriter) *Escpos {
 	return escpos
 }
 
-func (e *Escpos) WriteGTest() {
+func (e *Escpos) WriteG() {
 	e.dev.Write([]byte{0xc4, 0x9e})
+}
+
+func (e *Escpos) WriteBigC() {
+	e.dev.Write([]byte{0xc3, 0x87})
 }
