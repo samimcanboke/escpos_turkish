@@ -58,7 +58,7 @@ func (e *Escpos) Writeln(text string) {
 // New create new Escpos struct and set default enconding
 func New(dev io.ReadWriter) *Escpos {
 	escpos := &Escpos{dev: dev}
-	escpos.Charset(CharsetPC437)
+	escpos.Charset(CharsetISO8859_9)
 
 	return escpos
 }
