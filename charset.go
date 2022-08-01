@@ -13,6 +13,7 @@ const (
 	CharsetPC858       charset = 19
 	CharsetISO8859_9   charset = 20
 	CharsetWindows1254 charset = 21
+	CharsetWindows1255 charset = 22
 )
 
 func (e *Escpos) Charset(charset charset) {
@@ -32,7 +33,9 @@ func (e *Escpos) Charset(charset charset) {
 	case CharsetISO8859_9:
 		e.enc = charmap.ISO8859_9.NewEncoder()
 	case CharsetWindows1254:
-		e.enc = charmap.ISO8859_9.NewEncoder()
+		e.enc = charmap.Windows1254.NewEncoder()
+	case CharsetWindows1255:
+		e.enc = charmap.Windows1255.NewEncoder()
 	}
 
 	e.dev.Write([]byte{esc, 0x74, byte(charset)})
