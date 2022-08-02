@@ -52,8 +52,7 @@ func (e *Escpos) WriteByte(text []byte) {
 	e.dev.Write(text)
 }
 
-func (e *Escpos) ConvertTR(str string) string {
-	e.dev.Write([]byte{0x1B, 0x74, 0b1101})
+func ConvertTR(str string) string {
 	if strings.ContainsAny(str, "ŞşÖöÇçİıĞğÜü") {
 		newStr := strings.ReplaceAll(str, "Ş", string([]byte{0x9E}))
 		newStr = strings.ReplaceAll(newStr, "ş", string([]byte{0x9F}))
