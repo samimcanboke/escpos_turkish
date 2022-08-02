@@ -1,8 +1,12 @@
 package escpos_turkish
 
 import (
+	"fmt"
 	"golang.org/x/text/encoding"
+	"image"
 	"io"
+	"log"
+	"os"
 	"strings"
 )
 
@@ -52,7 +56,7 @@ func (e *Escpos) WriteByte(text []byte) {
 	e.dev.Write(text)
 }
 
-func ConvertTR(str string) string {
+func convertTR(str string) string {
 	if strings.ContainsAny(str, "ŞşÖöÇçİıĞğÜü") {
 		newStr := strings.ReplaceAll(str, "Ş", string([]byte{0x9E}))
 		newStr = strings.ReplaceAll(newStr, "ş", string([]byte{0x9F}))
@@ -71,6 +75,10 @@ func ConvertTR(str string) string {
 		return str
 	}
 }
+func (e *Escpos) WriteTr(str string) {
+	newStr := convertTR(str)
+	e.dev.Write([]byte(newStr))
+}
 
 func (e *Escpos) Writeln(text string) {
 	e.Write(text + "\n")
@@ -82,4 +90,57 @@ func New(dev io.ReadWriter) *Escpos {
 	escpos.Charset(CharsetWindows1254)
 
 	return escpos
+}
+
+func (e *Escpos) PrintImageFromFile(imgName string) {
+	path, err := os.Getwd()
+	if strings.Contains(imgName, path) {
+		path = imgName
+	} else {
+		path = path + imgName
+	}
+	imgFile, err := os.Open(path)
+	if err != nil {
+		log.Fatal(err)
+	}
+	img, _, err := image.Decode(imgFile)
+	imgFile.Close()
+	if err != nil {
+		log.Fatal(err)
+	}
+	_, _, _, _, imgData := PrintImage(img)
+	e.dev.Write(imgData)
+}
+
+func (e *Escpos) PrintBarcode(typ string, textPosition uint8, textFont bool, barcodeHeight uint8, barcodeWidth uint8, data string) {
+	e.HRIPosition(textPosition)
+	e.HRIFont(textFont)
+	e.BarcodeWidth(barcodeWidth)
+	e.BarcodeHeight(barcodeHeight)
+	switch typ {
+	case "EAN13":
+		ean13, err := e.EAN13(data)
+		if err != nil {
+			fmt.Println("Barkod Yazma Hatası", err)
+		}
+		fmt.Println(ean13)
+	case "EAN8":
+		ean8, err := e.EAN8(data)
+		if err != nil {
+			fmt.Println("Barkod Yazma Hatası", err)
+		}
+		fmt.Println(ean8)
+	case "UPCE":
+		upce, err := e.UPCE(data)
+		if err != nil {
+			fmt.Println("Barkod Yazma Hatası", err)
+		}
+		fmt.Println(upce)
+	case "UPCA":
+		upca, err := e.UPCA(data)
+		if err != nil {
+			fmt.Println("Barkod Yazma Hatası", err)
+		}
+		fmt.Println(upca)
+	}
 }
