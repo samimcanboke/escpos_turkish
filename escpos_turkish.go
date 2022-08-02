@@ -3,6 +3,7 @@ package escpos_turkish
 import (
 	"golang.org/x/text/encoding"
 	"io"
+	"strings"
 )
 
 const (
@@ -51,6 +52,27 @@ func (e *Escpos) WriteByte(text []byte) {
 	e.dev.Write(text)
 }
 
+func (e *Escpos) ConvertTR(str string) string {
+	e.dev.Write([]byte{0x1B, 0x74, 0b1101})
+	if strings.ContainsAny(str, "ŞşÖöÇçİıĞğÜü") {
+		newStr := strings.ReplaceAll(str, "Ş", string([]byte{0x9E}))
+		newStr = strings.ReplaceAll(newStr, "ş", string([]byte{0x9F}))
+		newStr = strings.ReplaceAll(newStr, "ğ", string([]byte{0xA7}))
+		newStr = strings.ReplaceAll(newStr, "Ğ", string([]byte{0xA6}))
+		newStr = strings.ReplaceAll(newStr, "ı", string([]byte{0x8D}))
+		newStr = strings.ReplaceAll(newStr, "İ", string([]byte{0x98}))
+		newStr = strings.ReplaceAll(newStr, "ö", string([]byte{0x94}))
+		newStr = strings.ReplaceAll(newStr, "Ö", string([]byte{0x99}))
+		newStr = strings.ReplaceAll(newStr, "ü", string([]byte{0x81}))
+		newStr = strings.ReplaceAll(newStr, "Ü", string([]byte{0x9A}))
+		newStr = strings.ReplaceAll(newStr, "ç", string([]byte{0x87}))
+		newStr = strings.ReplaceAll(newStr, "Ç", string([]byte{0x80}))
+		return newStr
+	} else {
+		return str
+	}
+}
+
 func (e *Escpos) Writeln(text string) {
 	e.Write(text + "\n")
 }
@@ -58,15 +80,7 @@ func (e *Escpos) Writeln(text string) {
 // New create new Escpos struct and set default enconding
 func New(dev io.ReadWriter) *Escpos {
 	escpos := &Escpos{dev: dev}
-	escpos.Charset(CharsetISO8859_9)
+	escpos.Charset(CharsetWindows1254)
 
 	return escpos
-}
-
-func (e *Escpos) WriteG() {
-	e.dev.Write([]byte{0xc4, 0x9e})
-}
-
-func (e *Escpos) WriteBigC() {
-	e.dev.Write([]byte{0xc3, 0x87})
 }
