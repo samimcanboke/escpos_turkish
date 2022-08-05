@@ -111,7 +111,8 @@ func (e *Escpos) PrintImageFromFile(imgName string) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	_, _, _, _, imgData := PrintImage(img)
+	xL, xH, yL, yH, imgData := PrintImage(img)
+	fmt.Println(xL, xH, yL, yH)
 	e.dev.Write(imgData)
 }
 
